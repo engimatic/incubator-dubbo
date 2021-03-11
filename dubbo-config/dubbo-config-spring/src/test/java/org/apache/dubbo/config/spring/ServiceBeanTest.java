@@ -17,13 +17,16 @@
 package org.apache.dubbo.config.spring;
 
 import org.apache.dubbo.config.annotation.Service;
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.Mockito.mock;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ServiceBeanTest {
     @Test
     public void testGetService() {
@@ -31,7 +34,7 @@ public class ServiceBeanTest {
         ServiceBean serviceBean = new ServiceBean(service);
 
         Service beanService = serviceBean.getService();
-        Assert.assertThat(beanService, not(nullValue()));
+        MatcherAssert.assertThat(beanService, not(nullValue()));
     }
 
     abstract class TestService implements Service {

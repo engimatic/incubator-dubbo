@@ -20,6 +20,7 @@ import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.spring.context.annotation.DubboComponentScan;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
@@ -30,22 +31,22 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @DubboComponentScan(basePackages = "org.apache.dubbo.config.spring.context.annotation.provider")
-@PropertySource("META-INF/default.properties")
+@PropertySource("classpath:/META-INF/default.properties")
 @EnableTransactionManagement
 public class ProviderConfiguration {
 
     /**
      * Current application configuration, to replace XML config:
      * <prev>
-     * &lt;dubbo:application name="dubbo-annotation-provider"/&gt;
+     * &lt;dubbo:application name="dubbo-demo-application"/&gt;
      * </prev>
      *
      * @return {@link ApplicationConfig} Bean
      */
-    @Bean("dubbo-annotation-provider")
+    @Bean("dubbo-demo-application")
     public ApplicationConfig applicationConfig() {
         ApplicationConfig applicationConfig = new ApplicationConfig();
-        applicationConfig.setName("dubbo-annotation-provider");
+        applicationConfig.setName("dubbo-demo-application");
         return applicationConfig;
     }
 
@@ -67,7 +68,7 @@ public class ProviderConfiguration {
     /**
      * Current protocol configuration, to replace XML config:
      * <prev>
-     * &lt;dubbo:protocol name="dubbo" port="12345"/&gt;
+     * &lt;dubbo:protocol name="injvm" port="-1"/&gt;
      * </prev>
      *
      * @return {@link ProtocolConfig} Bean
@@ -75,8 +76,8 @@ public class ProviderConfiguration {
     @Bean("dubbo")
     public ProtocolConfig protocolConfig() {
         ProtocolConfig protocolConfig = new ProtocolConfig();
-        protocolConfig.setName("dubbo");
-        protocolConfig.setPort(12345);
+        protocolConfig.setName("injvm");
+        protocolConfig.setPort(-1);
         return protocolConfig;
     }
 

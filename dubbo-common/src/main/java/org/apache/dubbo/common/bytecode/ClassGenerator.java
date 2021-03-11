@@ -16,8 +16,10 @@
  */
 package org.apache.dubbo.common.bytecode;
 
-import org.apache.dubbo.common.utils.ClassHelper;
+import org.apache.dubbo.common.utils.ArrayUtils;
+import org.apache.dubbo.common.utils.ClassUtils;
 import org.apache.dubbo.common.utils.ReflectUtils;
+import org.apache.dubbo.common.utils.StringUtils;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -27,7 +29,6 @@ import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.CtNewMethod;
-import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 
 import java.lang.reflect.Constructor;
@@ -90,7 +91,7 @@ public final class ClassGenerator {
         ClassPool pool = POOL_MAP.get(loader);
         if (pool == null) {
             pool = new ClassPool(true);
-            pool.appendClassPath(new LoaderClassPath(loader));
+            pool.appendClassPath(new CustomizedLoaderClassPath(loader));
             POOL_MAP.put(loader, pool);
         }
         return pool;
@@ -100,11 +101,9 @@ public final class ClassGenerator {
         StringBuilder modifier = new StringBuilder();
         if (Modifier.isPublic(mod)) {
             modifier.append("public");
-        }
-        if (Modifier.isProtected(mod)) {
+        } else if (Modifier.isProtected(mod)) {
             modifier.append("protected");
-        }
-        if (Modifier.isPrivate(mod)) {
+        } else if (Modifier.isPrivate(mod)) {
             modifier.append("private");
         }
 
@@ -165,7 +164,7 @@ public final class ClassGenerator {
         StringBuilder sb = new StringBuilder();
         sb.append(modifier(mod)).append(' ').append(ReflectUtils.getName(type)).append(' ');
         sb.append(name);
-        if (def != null && def.length() > 0) {
+        if (StringUtils.isNotEmpty(def)) {
             sb.append('=');
             sb.append(def);
         }
@@ -198,7 +197,7 @@ public final class ClassGenerator {
             sb.append(" arg").append(i);
         }
         sb.append(')');
-        if (ets != null && ets.length > 0) {
+        if (ArrayUtils.isNotEmpty(ets)) {
             sb.append(" throws ");
             for (int i = 0; i < ets.length; i++) {
                 if (i > 0) {
@@ -250,7 +249,7 @@ public final class ClassGenerator {
             sb.append(" arg").append(i);
         }
         sb.append(')');
-        if (ets != null && ets.length > 0) {
+        if (ArrayUtils.isNotEmpty(ets)) {
             sb.append(" throws ");
             for (int i = 0; i < ets.length; i++) {
                 if (i > 0) {
@@ -283,7 +282,7 @@ public final class ClassGenerator {
     }
 
     public Class<?> toClass() {
-        return toClass(ClassHelper.getClassLoader(ClassGenerator.class),
+        return toClass(ClassUtils.getClassLoader(ClassGenerator.class),
                 getClass().getProtectionDomain());
     }
 
@@ -341,9 +340,7 @@ public final class ClassGenerator {
             return mCtc.toClass(loader, pd);
         } catch (RuntimeException e) {
             throw e;
-        } catch (NotFoundException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        } catch (CannotCompileException e) {
+        } catch (NotFoundException | CannotCompileException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
