@@ -2,6 +2,7 @@ package com.rpc;
 
 import com.rpc.consumer1.Consumer1;
 import com.rpc.consumer2.Consumer2;
+import com.rpc.consumer3.Consumer3;
 
 /**
  * @description:
@@ -11,7 +12,7 @@ import com.rpc.consumer2.Consumer2;
  */
 public class ComsumerApplication {
     public static void main(String[] args) {
-        consumer2plus1();
+        consumer3();
     }
 
     public static void consumer1() {
@@ -28,6 +29,9 @@ public class ComsumerApplication {
         Consumer2 consumer2 = new Consumer2();
         consumer2.consumer2plus1();
     }
-
+    public static void consumer3() {
+        Consumer3 consumer3 = new Consumer3();
+        consumer3.consumer3();
+    }
 
 }

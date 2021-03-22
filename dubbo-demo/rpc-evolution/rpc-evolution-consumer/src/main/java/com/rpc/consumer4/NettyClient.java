@@ -1,6 +1,6 @@
-package com.rpc.consumer3;
+package com.rpc.consumer4;
 
-
+import com.rpc.consumer3.NettyClientHandler;
 import com.rpc.service.ISayHelloService;
 import com.rpc.service.RequestEntity;
 import io.netty.bootstrap.Bootstrap;
@@ -13,35 +13,32 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import org.apache.commons.lang3.time.StopWatch;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.lang.reflect.Method;
-import java.net.Socket;
-import java.util.concurrent.CountDownLatch;
 
 /**
- * @description: 消费者1代
+ * @description:
  * @author: tianjin
  * @email: eternity_bliss@sina.cn
- * @create: 2021-03-15 下午1:41
+ * @create: 2021-03-22 下午4:15
  */
-public class Consumer3 {
+public class NettyClient {
 
-    public void consumer3() {
+    private RequestSendHandler requestSendHandler;
+
+    public static NettyClient getInstance(){
+        return NettyClientHolder.instance;
+    }
+
+    private static class NettyClientHolder{
+        private static final NettyClient instance = new NettyClient();
+    }
+
+    private NettyClient() {
+        this.requestSendHandler = new RequestSendHandler();
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         String host = "0.0.0.0";
         int port = 18080;
-
         try {
-            String interfaceName = ISayHelloService.class.getName();
-
-            Method method = ISayHelloService.class.getMethod("sayHello", String.class);
-            Object[] agrs = {"world"};
-            RequestEntity entity = new RequestEntity(interfaceName, method.getName(), agrs);
-
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.channel(NioSocketChannel.class);
             bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
@@ -57,7 +54,7 @@ public class Consumer3 {
                     pipeline.addLast(new LengthFieldPrepender(4));
                     pipeline.addLast(new ObjectEncoder());
                     pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.weakCachingConcurrentResolver(this.getClass().getClassLoader())));
-                    pipeline.addLast(new NettyClientHandler());
+                    pipeline.addLast(requestSendHandler);
                 }
             });
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
@@ -65,13 +62,15 @@ public class Consumer3 {
                 System.err.println("connect success!");
             }
             Channel channel = channelFuture.channel();
-            channel.writeAndFlush(entity);
             channel.closeFuture().sync();
-        } catch (InterruptedException | NoSuchMethodException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             eventLoopGroup.shutdownGracefully();
         }
+    }
 
+    public RequestSendHandler getRequestSendHandler() {
+        return requestSendHandler;
     }
 }
