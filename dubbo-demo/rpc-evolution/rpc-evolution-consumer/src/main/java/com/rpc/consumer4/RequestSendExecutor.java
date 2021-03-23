@@ -2,8 +2,6 @@ package com.rpc.consumer4;
 
 import com.google.common.reflect.Reflection;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 /**
  * @description:
@@ -13,7 +11,6 @@ import java.util.concurrent.FutureTask;
  */
 public class RequestSendExecutor {
     public static <T> T execute(Class<T> rpcInterface) {
-        Future<T> future = new FutureTask<>()
         return Reflection.newProxy(rpcInterface, new RequestSendProxy());
     }
 }

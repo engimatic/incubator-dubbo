@@ -18,28 +18,28 @@ import java.util.concurrent.ExecutionException;
  * @create: 2021-03-22 下午4:14
  */
 public class RequestSendHandler extends ChannelInboundHandlerAdapter {
-    private volatile ChannelHandlerContext ctx;
 
-    private Map<String, MessageCallBack> pool = new ConcurrentHashMap<>();
+    private Map<String, MessageCallBack> pool;
+
+    public RequestSendHandler(Map<String, MessageCallBack> pool) {
+        this.pool = pool;
+    }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        this.ctx = ctx;
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ResponseEntity response = (ResponseEntity) msg;
-        String messageId = response.getMessageId();
+        String messageId = response.getId();
         MessageCallBack callBack = pool.get(messageId);
         if (callBack != null) {
-            mapCallBack.remove(messageId);
+            pool.remove(messageId);
             callBack.over(response);
         }
     }
 
-    public ResponseEntity sendRequest(RequestEntity requestEntity) throws ExecutionException, InterruptedException {
-        ctx.writeAndFlush(requestEntity);
-    }
+
 }

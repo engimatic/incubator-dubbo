@@ -14,6 +14,9 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * @description:
@@ -22,8 +25,6 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
  * @create: 2021-03-22 下午4:15
  */
 public class NettyClient {
-
-    private RequestSendHandler requestSendHandler;
 
     public static NettyClient getInstance(){
         return NettyClientHolder.instance;
@@ -34,7 +35,7 @@ public class NettyClient {
     }
 
     private NettyClient() {
-        this.requestSendHandler = new RequestSendHandler();
+
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         String host = "0.0.0.0";
         int port = 18080;
@@ -54,23 +55,27 @@ public class NettyClient {
                     pipeline.addLast(new LengthFieldPrepender(4));
                     pipeline.addLast(new ObjectEncoder());
                     pipeline.addLast(new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.weakCachingConcurrentResolver(this.getClass().getClassLoader())));
-                    pipeline.addLast(requestSendHandler);
+                    pipeline.addLast(new RequestSendHandler(pool));
                 }
             });
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             if (channelFuture.isSuccess()) {
-                System.err.println("connect success!");
+                System.out.println("connect success!");
             }
-            Channel channel = channelFuture.channel();
-            channel.closeFuture().sync();
+            this.channel = channelFuture.channel();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-            eventLoopGroup.shutdownGracefully();
         }
     }
 
-    public RequestSendHandler getRequestSendHandler() {
-        return requestSendHandler;
+    private volatile Channel channel;
+
+    private Map<String, MessageCallBack> pool = new ConcurrentHashMap<>();
+
+    public MessageCallBack sendRequest(RequestEntity requestEntity) {
+        MessageCallBack callBack = new MessageCallBack(requestEntity.getId());
+        pool.put(requestEntity.getId(), callBack);
+        channel.writeAndFlush(requestEntity);
+        return callBack;
     }
 }

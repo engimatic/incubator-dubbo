@@ -15,7 +15,7 @@ public class RequestSendProxy extends AbstractInvocationHandler {
     @Override
     protected Object handleInvocation(Object proxy, Method method, Object[] args) throws Throwable {
         RequestEntity request = new RequestEntity(method.getDeclaringClass().getName(),method.getName(), args);
-        RequestSendHandler sendHandler = NettyClient.getInstance().getRequestSendHandler();
-        return sendHandler.sendRequest(request);
+        MessageCallBack callBack = NettyClient.getInstance().sendRequest(request);
+        return callBack.get();
     }
 }

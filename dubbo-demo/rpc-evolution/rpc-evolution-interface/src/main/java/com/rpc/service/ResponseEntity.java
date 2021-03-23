@@ -10,7 +10,7 @@ import java.util.Arrays;
  * @create: 2021-03-15 下午2:55
  */
 public class ResponseEntity implements Serializable {
-    private String messageId;
+    private String id;
     private Integer code;
     private String msg;
     private Object res;
@@ -18,19 +18,19 @@ public class ResponseEntity implements Serializable {
     private ResponseEntity() {
     }
 
-    public ResponseEntity(String messageId, Integer code, String msg, Object res) {
-        this.messageId = messageId;
+    public ResponseEntity(String id, Integer code, String msg, Object res) {
+        this.id = id;
         this.code = code;
         this.msg = msg;
         this.res = res;
     }
 
-    public String getMessageId() {
-        return messageId;
+    public String getId() {
+        return id;
     }
 
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Integer getCode() {
@@ -57,8 +57,8 @@ public class ResponseEntity implements Serializable {
         this.res = res;
     }
 
-    public static ResponseEntity ok(String messageId, Object object){
-        return new ResponseEntity(messageId, 200,"success", object);
+    public static ResponseEntity ok(String id, Object object){
+        return new ResponseEntity(id, 200,"success", object);
     }
 
 }

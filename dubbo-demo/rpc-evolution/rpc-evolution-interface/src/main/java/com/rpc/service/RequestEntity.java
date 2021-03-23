@@ -2,6 +2,7 @@ package com.rpc.service;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * @description:
@@ -10,14 +11,24 @@ import java.util.Arrays;
  * @create: 2021-03-15 下午2:55
  */
 public class RequestEntity implements Serializable {
+    private String id;
     private String interfaceName;
     private String methodName;
     private Object[] parameters;
 
     public RequestEntity(String interfaceName, String methodName, Object[] parameters) {
+        this.id = UUID.randomUUID().toString();
         this.interfaceName = interfaceName;
         this.methodName = methodName;
         this.parameters = parameters;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getInterfaceName() {
